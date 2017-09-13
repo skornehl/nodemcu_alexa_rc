@@ -9,8 +9,18 @@
 #define LED                             2
 
 #define room_wohnzimmer                 "11111"
+
 #define device_wand                     "10000"
 #define device_regal                    "01000"
+#define device_kugel                    "00100"
+
+char* devices[][3] =
+   // Format: RoomID, Name, ID
+{
+  { room_wohnzimmer, "10000", "test" },
+  { room_wohnzimmer, "01000", "lampe" },
+  { room_wohnzimmer, "00100", "foobar"  },
+};
 
 RCSwitch mySwitch = RCSwitch();
 fauxmoESP fauxmo;
@@ -40,7 +50,11 @@ void wifiSetup() {
 
 }
 
+// -----------------------------------------------------------------------------
+// 433MHz
+// -----------------------------------------------------------------------------
 void rfSetup() {
+  
   // Set GPIO Pin
   mySwitch.enableTransmit(2);
 
@@ -48,12 +62,37 @@ void rfSetup() {
   // mySwitch.setProtocol(1);
 
   // Optional set pulse length.
-  // mySwitch.setPulseLength(320);
+  mySwitch.setPulseLength(320);
 
   // Optional set number of transmission repetitions.
   mySwitch.setRepeatTransmit(7);
 }
 
+//https://learn.adafruit.com/easy-alexa-or-echo-control-of-your-esp8266-huzzah/software-setup
+// -----------------------------------------------------------------------------
+// callback makes it more generic
+// -----------------------------------------------------------------------------
+void callback(uint8_t device_id, const char * device_name, bool state) {
+  digitalWrite(LED, 0);
+  Serial.print("Room "); Serial.println(devices[device_id][0]); 
+  Serial.print("Device "); Serial.println(device_name); 
+  Serial.print("ID "); Serial.println(devices[device_id][1]);
+  Serial.print("state: ");
+  if (state) {
+    Serial.println("ON");
+    mySwitch.switchOn(devices[device_id][0], devices[device_id][1]);
+  } else {
+    Serial.println("OFF");
+    mySwitch.switchOff(devices[device_id][0], devices[device_id][1]);
+  }
+  Serial.println("-----------------------");
+  mySwitch.switchOff(room_wohnzimmer, device_wand);
+  digitalWrite(LED, 1);
+}
+
+// -----------------------------------------------------------------------------
+// Setup
+// -----------------------------------------------------------------------------
 void setup() {
 
   // Init serial port and clean garbage
@@ -70,47 +109,15 @@ void setup() {
   digitalWrite(LED, HIGH);
 
   // Fauxmo
-  fauxmo.addDevice("Wand");   //device id 0
-  fauxmo.addDevice("Regal");  //device id 1
-  fauxmo.addDevice("Licht");  //device id 2
+  int arraySize = (sizeof(devices)/ sizeof(int) / 3);
 
-  fauxmo.onMessage([](unsigned char device_id, const char * device_name, bool state) {
-    digitalWrite(LED, 0);
+  for (int i = 0; i < arraySize; i++){
+    Serial.println(String("Add ") + devices[i][2]);
+    fauxmo.addDevice(devices[i][2]); 
+  }
 
-    Serial.println(device_id);
-    Serial.println(state);
-    
-    if (state == 1) {   // RF On
-      switch (device_id) {
-        case 0:
-          mySwitch.switchOn(room_wohnzimmer, device_wand);
-          break;
-        case 1:
-          mySwitch.switchOn(room_wohnzimmer, device_regal);
-          break;
-        case 2:
-          mySwitch.switchOn(room_wohnzimmer, device_wand);
-          delay(100);
-          mySwitch.switchOn(room_wohnzimmer, device_regal);
-          break;
-      }
-    } else {     // RF Off
-      switch (device_id) {
-        case 0:
-          mySwitch.switchOff(room_wohnzimmer, device_wand);
-          break;
-        case 1:
-          mySwitch.switchOff(room_wohnzimmer, device_regal);
-          break;
-        case 2:
-          mySwitch.switchOff(room_wohnzimmer, device_wand);
-          delay(100);
-          mySwitch.switchOff(room_wohnzimmer, device_regal);
-          break;
-      }
-    }
-    digitalWrite(LED, 1);
-  });
+  Serial.println();
+  fauxmo.onMessage(callback);
 }
 
 void loop() {
