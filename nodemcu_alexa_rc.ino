@@ -8,9 +8,12 @@
 #define SERIAL_BAUDRATE                 115200
 #define LED                             2
 
-#define room_wohnzimmer                 "11111"
-#define device_wand                     "10000"
-#define device_regal                    "01000"
+#define room_wohnzimmer                 "10101"
+#define device_a                        "10000"
+#define device_b                        "01000"
+#define device_c                        "00100"
+#define device_d                        "00010"
+#define device_e                        "00001"
 
 RCSwitch mySwitch = RCSwitch();
 fauxmoESP fauxmo;
@@ -18,7 +21,6 @@ fauxmoESP fauxmo;
 // -----------------------------------------------------------------------------
 // Wifi
 // -----------------------------------------------------------------------------
-
 void wifiSetup() {
 
   // Set WIFI module to STA mode
@@ -26,6 +28,7 @@ void wifiSetup() {
 
   // Connect
   Serial.printf("[WIFI] Connecting to %s ", WIFI_SSID);
+  WiFi.hostname("RC-Gateway-2");
   WiFi.begin(WIFI_SSID, WIFI_PASS);
 
   // Wait
@@ -34,6 +37,7 @@ void wifiSetup() {
     delay(100);
   }
   Serial.println();
+  WiFi.setAutoReconnect(1);
 
   // Connected!
   Serial.printf("[WIFI] STATION Mode, SSID: %s, IP address: %s\n", WiFi.SSID().c_str(), WiFi.localIP().toString().c_str());
@@ -51,7 +55,7 @@ void rfSetup() {
   // mySwitch.setPulseLength(320);
 
   // Optional set number of transmission repetitions.
-  mySwitch.setRepeatTransmit(7);
+  mySwitch.setRepeatTransmit(8);
 }
 
 void setup() {
@@ -70,9 +74,11 @@ void setup() {
   digitalWrite(LED, HIGH);
 
   // Fauxmo
-  fauxmo.addDevice("Wand");   //device id 0
-  fauxmo.addDevice("Regal");  //device id 1
-  fauxmo.addDevice("Licht");  //device id 2
+  fauxmo.addDevice("Spüle");   //device id 0
+  fauxmo.addDevice("Küche");  //device id 1
+  fauxmo.addDevice("Stube");  //device id 2
+  fauxmo.addDevice("Weihnachtsbaum");  //device id 3
+  //fauxmo.addDevice("");  //device id 4
 
   fauxmo.onMessage([](unsigned char device_id, const char * device_name, bool state) {
     digitalWrite(LED, 0);
@@ -83,29 +89,37 @@ void setup() {
     if (state == 1) {   // RF On
       switch (device_id) {
         case 0:
-          mySwitch.switchOn(room_wohnzimmer, device_wand);
+          mySwitch.switchOn(room_wohnzimmer, device_a);
           break;
         case 1:
-          mySwitch.switchOn(room_wohnzimmer, device_regal);
+          mySwitch.switchOn(room_wohnzimmer, device_b);
           break;
         case 2:
-          mySwitch.switchOn(room_wohnzimmer, device_wand);
-          delay(100);
-          mySwitch.switchOn(room_wohnzimmer, device_regal);
+          mySwitch.switchOn(room_wohnzimmer, device_c);
+          break;
+        case 3:
+          mySwitch.switchOn(room_wohnzimmer, device_d);
+          break;
+        case 4:
+          mySwitch.switchOn(room_wohnzimmer, device_e);
           break;
       }
     } else {     // RF Off
       switch (device_id) {
         case 0:
-          mySwitch.switchOff(room_wohnzimmer, device_wand);
+          mySwitch.switchOff(room_wohnzimmer, device_a);
           break;
         case 1:
-          mySwitch.switchOff(room_wohnzimmer, device_regal);
+          mySwitch.switchOff(room_wohnzimmer, device_b);
           break;
         case 2:
-          mySwitch.switchOff(room_wohnzimmer, device_wand);
-          delay(100);
-          mySwitch.switchOff(room_wohnzimmer, device_regal);
+          mySwitch.switchOff(room_wohnzimmer, device_c);
+          break;
+        case 3:
+          mySwitch.switchOff(room_wohnzimmer, device_d);
+          break;
+        case 4:
+          mySwitch.switchOff(room_wohnzimmer, device_e);
           break;
       }
     }
