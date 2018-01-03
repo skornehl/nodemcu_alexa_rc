@@ -8,12 +8,12 @@
 #define SERIAL_BAUDRATE                 115200
 #define LED                             2
 
-#define room_wohnzimmer                 "10101"
-#define device_a                        "10000"
-#define device_b                        "01000"
-#define device_c                        "00100"
-#define device_d                        "00010"
-#define device_e                        "00001"
+#define room_wohnzimmer                 "11111"
+#define device_wand                     "10000"
+#define device_regal                    "01000"
+#define device_kugel                    "00100"
+#define device_stehlampe                "00010"
+#define device_weihnachtsbaum           "00001"
 
 RCSwitch mySwitch = RCSwitch();
 fauxmoESP fauxmo;
@@ -28,7 +28,7 @@ void wifiSetup() {
 
   // Connect
   Serial.printf("[WIFI] Connecting to %s ", WIFI_SSID);
-  WiFi.hostname("RC-Gateway-2");
+  WiFi.hostname("RC-Gateway-1");
   WiFi.begin(WIFI_SSID, WIFI_PASS);
 
   // Wait
@@ -74,11 +74,11 @@ void setup() {
   digitalWrite(LED, HIGH);
 
   // Fauxmo
-  fauxmo.addDevice("Spüle");   //device id 0
-  fauxmo.addDevice("Küche");  //device id 1
-  fauxmo.addDevice("Stube");  //device id 2
-  fauxmo.addDevice("Weihnachtsbaum");  //device id 3
-  //fauxmo.addDevice("");  //device id 4
+  fauxmo.addDevice("Wand");   //device id 0
+  fauxmo.addDevice("Regal");  //device id 1
+  fauxmo.addDevice("Kugel");  //device id 2
+  fauxmo.addDevice("Stehlampe");  //device id 3
+  fauxmo.addDevice("Weihnachtsbaum");  //device id 4
 
   fauxmo.onMessage([](unsigned char device_id, const char * device_name, bool state) {
     digitalWrite(LED, 0);
@@ -89,37 +89,37 @@ void setup() {
     if (state == 1) {   // RF On
       switch (device_id) {
         case 0:
-          mySwitch.switchOn(room_wohnzimmer, device_a);
+          mySwitch.switchOn(room_wohnzimmer, device_wand);
           break;
         case 1:
-          mySwitch.switchOn(room_wohnzimmer, device_b);
+          mySwitch.switchOn(room_wohnzimmer, device_regal);
           break;
         case 2:
-          mySwitch.switchOn(room_wohnzimmer, device_c);
+          mySwitch.switchOn(room_wohnzimmer, device_kugel);
           break;
         case 3:
-          mySwitch.switchOn(room_wohnzimmer, device_d);
+          mySwitch.switchOn(room_wohnzimmer, device_stehlampe);
           break;
         case 4:
-          mySwitch.switchOn(room_wohnzimmer, device_e);
+          mySwitch.switchOn(room_wohnzimmer, device_weihnachtsbaum);
           break;
       }
     } else {     // RF Off
       switch (device_id) {
         case 0:
-          mySwitch.switchOff(room_wohnzimmer, device_a);
+          mySwitch.switchOff(room_wohnzimmer, device_wand);
           break;
         case 1:
-          mySwitch.switchOff(room_wohnzimmer, device_b);
+          mySwitch.switchOff(room_wohnzimmer, device_regal);
           break;
         case 2:
-          mySwitch.switchOff(room_wohnzimmer, device_c);
+          mySwitch.switchOff(room_wohnzimmer, device_kugel);
           break;
         case 3:
-          mySwitch.switchOff(room_wohnzimmer, device_d);
+          mySwitch.switchOff(room_wohnzimmer, device_stehlampe);
           break;
         case 4:
-          mySwitch.switchOff(room_wohnzimmer, device_e);
+          mySwitch.switchOff(room_wohnzimmer, device_weihnachtsbaum);
           break;
       }
     }
