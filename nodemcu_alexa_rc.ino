@@ -8,13 +8,15 @@
 #define SERIAL_BAUDRATE                 115200
 #define LED                             2
 
-#define room_wohnzimmer                 "11111"
+#define room_wohnzimmer                 "10001"
 
 char* devices[][3] =
    // Format: RoomID, Name, ID
 {
-  { room_wohnzimmer, "10000", "test" },
-  { room_wohnzimmer, "00001", "foobar"  },
+  { room_wohnzimmer, "10000", "Lichterschlauch" },
+  { room_wohnzimmer, "01000", "Schloss" },
+  { room_wohnzimmer, "00100", "Kleiderschrank" },
+  { room_wohnzimmer, "00010", "Himmel" },
 };
 
 RCSwitch mySwitch = RCSwitch();
@@ -81,7 +83,6 @@ void callback(uint8_t device_id, const char * device_name, bool state) {
     mySwitch.switchOff(devices[device_id][0], devices[device_id][1]);
   }
   Serial.println("-----------------------");
-  //mySwitch.switchOff(room_wohnzimmer, device_wand);
   digitalWrite(LED, 1);
 }
 
@@ -107,7 +108,6 @@ void setup() {
   int arraySize = (sizeof(devices)/ sizeof(int) / 3);
 
   for (int i = 0; i < arraySize; i++){
-    Serial.println(String("Add ") + devices[i][2]);
     fauxmo.addDevice(devices[i][2]); 
   }
 
